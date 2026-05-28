@@ -1,8 +1,6 @@
-import { useState,useEffect,useCallback } from "react";
+import { useState,useEffect,useCallback,useRef } from "react";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "IDR", "SGD", "AUD", "CAD", "CNY", "CHF", "KRW", "MYR", "THB", "HKD", "INR"];
-
-//console.log("API KEY:", import.meta.env.VITE_EXCHANGE_API_KEY);
 
 const API_KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
 
@@ -10,19 +8,44 @@ function Home() {
     const [amount, setAmount] = useState(100);
     const [fromCur, setFromCur] = useState("USD");
     const [toCur, setToCur] = useState("IDR");
-    const [rates,setRates] = useState({});
+    const [rates,setRates] = useState(null);
     const [lastUpdated, setLastUpdated] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");    
+    const cacheRef = useRef({});
+    const debounceRef = useRef(null);
+
+    const handleFromCurChange = (e) => {
+        const value = e.target.value;
+        setFromCur(value);
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            fetchRates(value);
+        }, 300);
+    }
+    const handleAmountChange = (e) => {
+        const value = parseFloat(e.target.value);
+        if (isNaN(value) || value < 0) return;
+        if (value > 1_000_000_000_000) return;
+        setAmount(value);
+    }
+
 
     const fetchRates = useCallback(async (base)=> {
+        if (cacheRef.current[base]) {
+            setRates(cacheRef.current[base]);
+            return;
+        }
+
+        if (!CURRENCIES.includes(base)) return;
+
         setLoading(true);
         setError("");
         try {
             const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/${base}`);
             if (!res.ok) throw new Error("Failed to fetch rates");
             const data = await res.json();
-            setRates(data.rates);
+            setRates(data.conversion_rates);
             setLastUpdated(new Date(data.time_last_update_utc).toLocaleDateString());
         }
         catch (err) {
@@ -42,7 +65,7 @@ function Home() {
         setToCur(fromCur);
     };
 
-    const rate = rates[toCur] || 0;
+    const rate = rates ? (rates[toCur] || 0) : 0;
     const result = (amount * rate).toLocaleString("en-US", {maximumFractionDigits: 4})
 
     return (
@@ -53,12 +76,12 @@ function Home() {
                 className="amount-input"
                 value={amount}
                 min={0}
-                onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                onChange={handleAmountChange}
                 />
                 <select 
                 className="currency-select" 
                 value={fromCur}
-                onChange={(e) => setFromCur(e.target.value)}
+                onChange={handleAmountChange}
                 >
                 {CURRENCIES.map((c) => (
                     <option key={c} value ={c}>{c}</option>
@@ -81,7 +104,7 @@ function Home() {
 
             {error && <p className="error">{error}</p>}
 
-            {loading ? (
+            {loading || !rates ? (
                 <div className="loading">Fetching live rates...</div>
             ) : (
                 <div className="result-card">

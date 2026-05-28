@@ -7,4 +7,10 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss()
   ],
+  // server: {
+  //   headers: {
+  //     "Content-Security-Policy": 
+  //       "default-src 'self'; connect-src 'self' https://v6.exchangerate-api.com;"
+  //   }
+  // }
 })
