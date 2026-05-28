@@ -1,6 +1,10 @@
-import { useState,useEffect,useCallback } from "react"
+import { useState,useEffect,useCallback } from "react";
 
-const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "IDR", "SGD", "AUD", "CAD", "CNY", "CHF", "KRW"]
+const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "IDR", "SGD", "AUD", "CAD", "CNY", "CHF", "KRW", "MYR", "THB", "HKD", "INR"];
+
+//console.log("API KEY:", import.meta.env.VITE_EXCHANGE_API_KEY);
+
+const API_KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
 
 function Home() {
     const [amount, setAmount] = useState(100);
@@ -9,20 +13,20 @@ function Home() {
     const [rates,setRates] = useState({});
     const [lastUpdated, setLastUpdated] = useState("");
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState("");    
 
     const fetchRates = useCallback(async (base)=> {
         setLoading(true);
         setError("");
         try {
-            const res = await fetch(`https://open.exchangerate-api.com/v6/latest/${base}`);
+            const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/${base}`);
             if (!res.ok) throw new Error("Failed to fetch rates");
             const data = await res.json();
             setRates(data.rates);
             setLastUpdated(new Date(data.time_last_update_utc).toLocaleDateString());
         }
         catch (err) {
-            setError("Couldn't fetch live rates! PLease try again.");           
+            setError("Couldn't fetch live rates! Please try again.");           
         }
         finally {
             setLoading(false);
@@ -31,7 +35,7 @@ function Home() {
 
     useEffect(()=> {
         fetchRates(fromCur);
-    }, [fromCur,setRates]);
+    }, [fromCur,fetchRates]);
 
     const handleSwap = ()=> {
         setFromCur(toCur);
@@ -85,7 +89,7 @@ function Home() {
                     <div className="result-amount">{result}</div>
                     <div className="result-currency">{toCur}</div>
                     <div className="rate-row">
-                        <span>1 {fromCur} = {rate.toFxed(6)} {toCur}</span>
+                        <span>1 {fromCur} = {rate.toFixed(6)} {toCur}</span>
                         <span>Updated {lastUpdated}</span>
                     </div>
                 </div>
