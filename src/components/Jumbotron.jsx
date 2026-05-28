@@ -6,6 +6,7 @@ function Jumbotron() {
                 <span className="dot"/>Live Rates
             </div>
             <h1>Exchange <em>anything</em>, instantly.</h1>
+            <p>Real-time world currency converter using real-time data</p>
         </div>
         </>
     )
