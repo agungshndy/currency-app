@@ -3,7 +3,7 @@ function Jumbotron() {
         <>
         <div className="jumbotron">
             <div className="live-badge">
-                <span className="dot"/>Live Rates
+                <span className="dot"/>Live Currency Rates
             </div>
             <h1>Exchange <em>anything</em>, instantly.</h1>
             <p>Real-time world currency converter using real-time data</p>
