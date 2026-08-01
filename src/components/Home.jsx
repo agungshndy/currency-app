@@ -6,7 +6,7 @@ const API_KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
 
 function Home() {
     const [amount, setAmount] = useState(100);
-    const [fromCur, setFromCur] = useState("");
+    const [fromCur, setFromCur] = useState("USD");
     const [toCur, setToCur] = useState("IDR");
     const [rates,setRates] = useState(null);
     const [lastUpdated, setLastUpdated] = useState("");
